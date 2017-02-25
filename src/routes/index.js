@@ -1,5 +1,6 @@
 import jwt from 'jwt-simple'
 import express from 'express'
+import { createError } from './helpers'
 import apiRoutes from './api'
 import { signingKey } from '../config/secrets'
 import User from '../models/user'
@@ -9,7 +10,7 @@ const routes = express.Router()
 routes.post('/signup', (req, res) => {
   const { email, password, name } = req.body
   if (!email || !name || !password) {
-    res.json({ success: false, msg: 'Please pass name, email and password.' })
+    res.status(400).json(createError('Please pass name, email and password.'))
     return
   }
 
@@ -21,30 +22,30 @@ routes.post('/signup', (req, res) => {
   // save the user
   newUser.save((err) => {
     if (err) {
-      res.json({ success: false, msg: 'Username or email already exists.' })
+      res.status(400).json(createError('Username or email already exists.'))
       return
     }
-    res.json({ success: true, msg: 'Successful user creation.' })
+    res.json({ })
   })
 })
 
-// route to authenticate a user (POST http://localhost:8080/api/authenticate)
+// route to authenticate a user (POST http://localhost:3001/api/authenticate)
 routes.post('/authenticate', (req, res) => {
   const { name, password } = req.body
   if (!name || !password) {
-    res.json({ success: false, msg: 'Please pass name, email and password.' })
+    res.status(400).json(createError('Please pass name and password.'))
     return
   }
   User.findOne({
     name,
   }, (err, user) => {
     if (err) {
-      res.status(500).send({ success: false, msg: 'Database error.' })
+      res.status(500).send(createError('Database error.'))
       return
     }
 
     if (!user) {
-      res.send({ success: false, msg: 'Authentication failed. User not found.' })
+      res.status(400).send(createError('Authentication failed. User not found.'))
       return
     }
 
@@ -56,9 +57,9 @@ routes.post('/authenticate', (req, res) => {
           name: user.name,
         }, signingKey)
         // return the information including token as JSON
-        res.json({ success: true, token: `JWT ${token}` })
+        res.json({ token: `JWT ${token}` })
       } else {
-        res.send({ success: false, msg: 'Authentication failed. Wrong password.' })
+        res.status(400).send(createError('Authentication failed. Wrong password.'))
       }
     })
   })
