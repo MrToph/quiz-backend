@@ -45,10 +45,8 @@ const LineSchema = new Schema({
   },
 })
 
-console.log('hu')
 LineSchema.path('artist').validate((value, respond) => {
   ArtistModel.findOne({ name: value }, (err, doc) => {
-    console.log('validating', value, err, doc)
     if (err || !doc) {
       respond(false)
     } else {

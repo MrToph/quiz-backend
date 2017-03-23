@@ -5,15 +5,26 @@ import Line from '../../models/line'
 
 const routes = express.Router()
 
-routes.get('/lines', passport.authenticate('jwt', { session: false }), (req, res) => {
-  Line.find({}, (err, lines) => {
-    if (err) {
-      res.status(500).send(createError('Database error.'))
-      return
-    }
+const linesPerRequest = 30
 
-    res.json({ lines })
-  })
+routes.get('/lines', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const { lineStatus } = req.query
+  const fromId = req.query.fromId
+
+  let query
+  if (fromId) query = Line.find({ active: lineStatus, _id: { $gt: fromId } })
+  else query = Line.find({ active: lineStatus })
+
+  query.sort({ _id: 1 })
+    .limit(linesPerRequest)
+    .exec((err, lines) => {
+      if (err) {
+        res.status(500).send(createError('Database error.'))
+        return
+      }
+
+      res.json({ lines })
+    })
 })
 
 routes.get('/lines/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -88,6 +99,37 @@ routes.delete('/lines/:lineId', passport.authenticate('jwt', { session: false })
 
     res.json({ })
   })
+})
+
+
+routes.post('/judgeLine/:lineId', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const lineId = req.params.lineId
+  const { acceptLine } = req.body
+  if (typeof acceptLine === 'undefined') {
+    res.status(400).json(createError('Please pass at least text, artist, songTitle and language.'))
+    return
+  }
+
+  if (acceptLine) {
+    const updateFields = { active: true }
+    Line.findOneAndUpdate({ _id: lineId }, updateFields, { new: true, runValidators: true }, (err) => {
+      if (err) {
+        res.status(500).send(createError(`Database error: ${err}`))
+        return
+      }
+
+      res.json({ })
+    })
+  } else {
+    Line.findOneAndRemove({ _id: lineId }, (err) => {
+      if (err) {
+        res.status(500).send(createError(`Database error: ${err}`))
+        return
+      }
+
+      res.json({ })
+    })
+  }
 })
 
 export default routes

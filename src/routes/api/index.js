@@ -1,6 +1,7 @@
 import express from 'express'
 import artistRoutes from './artist'
 import lineRoutes from './line'
+import scrapingRoutes from './scraping'
 
 const apiRoutes = express.Router()
 
@@ -13,5 +14,6 @@ const apiRoutes = express.Router()
 // merge API routes
 apiRoutes.use('/', artistRoutes)
 apiRoutes.use('/', lineRoutes)
+apiRoutes.use('/', scrapingRoutes)
 
 export default apiRoutes
