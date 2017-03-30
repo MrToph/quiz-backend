@@ -6,4 +6,4 @@
 
 ### Todo:
 - [x] Make user signup return error on existing email / name
-- [ ] Create API
+- [x] Create API

@@ -22,7 +22,7 @@ routes.post('/signup', (req, res) => {
   // save the user
   newUser.save((err) => {
     if (err) {
-      res.status(400).json(createError('Username or email already exists.'))
+      res.status(400).json(createError(err))
       return
     }
     res.json({ })

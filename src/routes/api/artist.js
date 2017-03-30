@@ -29,19 +29,19 @@ routes.get('/artists/:artistName', passport.authenticate('jwt', { session: false
 
 routes.post('/artists', passport.authenticate('jwt', { session: false }), (req, res) => {
   const { name, url } = req.body
-  if (!name || !url) {
-    res.status(400).json(createError('Please pass name and url.'))
+  if (!name) {
+    res.status(400).json(createError('Please pass name.'))
     return
   }
 
   const newArtist = new Artist({
     name,
-    url,
+    url: url || '',
   })
 
   newArtist.save((err) => {
     if (err) {
-      res.status(400).json(createError('Name or URL already exists.'))
+      res.status(400).json(createError(err))
       return
     }
     res.json({ })
@@ -51,14 +51,15 @@ routes.post('/artists', passport.authenticate('jwt', { session: false }), (req, 
 routes.patch('/artists/:artistName', passport.authenticate('jwt', { session: false }), (req, res) => {
   const oldName = req.params.artistName
   const { name, url } = req.body
-  if (!oldName || !name || !url) {
-    res.status(400).json(createError('Please pass old name, new name and url.'))
+
+  if (!oldName || !name) {
+    res.status(400).json(createError('Please pass at least old name and new name.'))
     return
   }
 
   const updateFields = {
     name,
-    url,
+    url: url || '',
   }
 
   Artist.findOneAndUpdate({ name: oldName }, updateFields, { new: true }, (err, artist) => {

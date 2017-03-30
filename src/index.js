@@ -4,10 +4,9 @@ import morgan from 'morgan'
 import mongoose from 'mongoose'
 import passport from 'passport'
 import apiRoutes from './routes'
+import { port, domain } from './config/env_vars'
 import { database } from './config/database'
 import jwtAuthorize from './config/passport'
-
-const port = process.env.PORT || 3001
 
 const app = express()
 
@@ -21,14 +20,13 @@ app.use(morgan('dev'))
 // Use the passport package in our application
 app.use(passport.initialize())
 
-// demo Route (GET http://localhost:3000)
 app.get('/', (req, res) => {
-  res.send(`Hello! The API is at http://localhost:${port}/api`)
+  res.send(`Hello! The API is at ${domain}:${port}/api`)
 })
 
 // Start the server
 app.listen(port)
-console.log(`Started server at: http://localhost:${port}`)
+console.log(`Started server at: ${domain}:${port}`)
 
 // connect to database
 mongoose.connect(database)
